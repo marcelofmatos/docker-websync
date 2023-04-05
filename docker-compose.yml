@@ -1,0 +1,32 @@
+### ENV
+#
+# WEBSERVER_FQDN
+# WEBSYNC_AUTH_BASIC
+# 
+version: '3.8'
+
+services:
+
+  websync:
+    image: furier/websync
+    command: node server.js
+    working_dir: /src
+    networks:
+      - web
+    deploy:
+       mode: replicated
+       replicas: 1
+       #placement:
+       #  constraints:
+       #    - node.labels.webserver == true
+       labels:
+       - traefik.enable=true
+       - traefik.port=3000
+       - traefik.frontend.rule=Host:${WEBSERVER_FQDN}
+       - traefik.es-path.frontend.auth.basic.users=${WEBSYNC_AUTH_BASIC}
+       - traefik.protocol=http
+       - traefik.docker.network=web
+       
+networks:
+  web:
+    external: true
